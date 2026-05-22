@@ -720,6 +720,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ===================== MODAL ===================== */
+.modal[hidden] { display: none; }
 .modal {
   position: fixed; inset: 0;
   background: rgba(15,23,42,.55);
