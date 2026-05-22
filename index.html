@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Examen Universitario Integral — Software Project Management — UPVALLE 2026" />
+  <title>Examen Integral · Software Project Management · UPVALLE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Librerías para exportación PDF y CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js" defer></script>
+  <!-- EmailJS para envío automático de resultados -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+</head>
+<body>
+
+  <!-- ======================== ENCABEZADO ======================== -->
+  <header class="topbar" id="topbar" hidden>
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">UPV</div>
+        <div class="brand-text">
+          <strong>Software Project Management</strong>
+          <span>Examen Integral · Unidad 4 · Personas · FlashDelivery</span>
+        </div>
+      </div>
+      <div class="timer-wrapper" aria-live="polite">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 11h-5v-2h3V6h2Z"/>
+        </svg>
+        <span id="timer" class="timer">70:00</span>
+      </div>
+    </div>
+    <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </header>
+
+  <!-- ======================== PANTALLA DE INICIO ======================== -->
+  <section class="screen screen-welcome active" id="screenWelcome">
+    <div class="welcome-card">
+      <div class="welcome-hero">
+        <div class="hero-glyph">📘</div>
+        <h1>Examen Integral · Software Project Management</h1>
+        <p class="subtitle">Unidad 4 — Dimensión <em>Personas</em> · Caso de Estudio FlashDelivery · UPVALLE 2026</p>
+      </div>
+
+      <div class="welcome-meta">
+        <div class="meta-pill"><strong>100</strong><span>Preguntas</span></div>
+        <div class="meta-pill"><strong>70</strong><span>Minutos</span></div>
+        <div class="meta-pill"><strong>Alta</strong><span>Dificultad</span></div>
+        <div class="meta-pill"><strong>13</strong><span>Trabajos analizados</span></div>
+      </div>
+
+      <form class="welcome-form" id="welcomeForm" novalidate>
+        <div class="form-group">
+          <label for="studentName">Nombre completo del estudiante</label>
+          <input type="text" id="studentName" name="studentName" autocomplete="name" required minlength="5" placeholder="Ej: Ana María Rojas Vargas" />
+          <span class="form-error" id="errName"></span>
+        </div>
+        <div class="form-group">
+          <label for="studentEmail">Correo electrónico institucional</label>
+          <input type="email" id="studentEmail" name="studentEmail" autocomplete="email" required placeholder="usuario@est.univalle.edu" />
+          <span class="form-error" id="errEmail"></span>
+        </div>
+
+        <div class="instructions">
+          <h3>Instrucciones de rendimiento</h3>
+          <ul>
+            <li>El examen consta de <strong>100 preguntas</strong> de tipo opción múltiple, verdadero/falso y completar la frase.</li>
+            <li>Tiempo máximo: <strong>70 minutos</strong>. El temporizador es persistente y no se detiene si recargas la página.</li>
+            <li>Al concluir el tiempo, el examen se entregará y calificará automáticamente.</li>
+            <li>Puedes navegar libremente entre las preguntas y revisar tus respuestas antes de finalizar.</li>
+            <li>Una vez enviado, recibirás un informe detallado por correo electrónico y podrás descargarlo en PDF/CSV.</li>
+          </ul>
+        </div>
+
+        <button type="submit" class="btn-primary btn-large" id="btnStart">
+          Iniciar Examen
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+        </button>
+      </form>
+
+      <footer class="welcome-footer">
+        Docente: <strong>Ing. Jorge Méndez Ayala</strong> · Universidad Privada del Valle (UPVALLE) · Santa Cruz de la Sierra, 2026
+      </footer>
+    </div>
+  </section>
+
+  <!-- ======================== PANTALLA DE EXAMEN ======================== -->
+  <section class="screen screen-exam" id="screenExam">
+    <div class="exam-layout">
+      <main class="exam-main">
+        <article class="question-card" id="questionCard" aria-live="polite">
+          <!-- Inyectado por JS -->
+        </article>
+
+        <nav class="exam-controls" aria-label="Controles de navegación">
+          <button class="btn-secondary" id="btnPrev" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
+            Anterior
+          </button>
+          <span class="question-counter" id="questionCounter">Pregunta 1 / 100</span>
+          <button class="btn-primary" id="btnNext" type="button">
+            Siguiente
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+          </button>
+        </nav>
+
+        <button class="btn-finish" id="btnFinish" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Finalizar y enviar examen
+        </button>
+      </main>
+
+      <aside class="exam-sidebar">
+        <div class="sidebar-card">
+          <h3>Mapa de preguntas</h3>
+          <p class="sidebar-help">
+            <span class="legend"><span class="dot dot-current"></span> Actual</span>
+            <span class="legend"><span class="dot dot-answered"></span> Respondida</span>
+            <span class="legend"><span class="dot dot-pending"></span> Pendiente</span>
+          </p>
+          <div class="question-grid" id="questionGrid"></div>
+          <div class="sidebar-stats">
+            <div><strong id="statAnswered">0</strong><span>Respondidas</span></div>
+            <div><strong id="statPending">100</strong><span>Pendientes</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ======================== PANTALLA DE RESULTADOS ======================== -->
+  <section class="screen screen-results" id="screenResults">
+    <div class="results-card">
+      <header class="results-header">
+        <h1>Resultado del Examen</h1>
+        <p id="resultStudent">—</p>
+      </header>
+
+      <div class="result-summary">
+        <div class="score-circle" id="scoreCircle" style="--p:0;">
+          <div class="score-inner">
+            <strong id="scoreNumber">0</strong>
+            <span>/ 100</span>
+          </div>
+        </div>
+        <div class="score-stats">
+          <div><strong id="resCorrect">0</strong><span>Correctas</span></div>
+          <div><strong id="resWrong">0</strong><span>Incorrectas</span></div>
+          <div><strong id="resBlank">0</strong><span>En blanco</span></div>
+          <div><strong id="resTime">0:00</strong><span>Tiempo usado</span></div>
+        </div>
+      </div>
+
+      <div class="feedback-section" id="feedbackSection">
+        <h2>Retroalimentación académica</h2>
+        <div id="feedbackBody"></div>
+      </div>
+
+      <div class="action-buttons">
+        <button type="button" class="btn-primary" id="btnPdf">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM6 20V4h7v5h5v11Z"/></svg>
+          Descargar PDF
+        </button>
+        <button type="button" class="btn-secondary" id="btnCsv">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 4h14v2H5zm0 4h14v2H5zm0 4h14v2H5zm0 4h14v2H5z"/></svg>
+          Exportar CSV
+        </button>
+        <button type="button" class="btn-secondary" id="btnEmail">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg>
+          Enviar por correo
+        </button>
+        <button type="button" class="btn-ghost" id="btnReview">Ver detalle por pregunta</button>
+      </div>
+
+      <div class="review-section" id="reviewSection" hidden>
+        <h2>Revisión detallada</h2>
+        <div id="reviewBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== MODAL DE CONFIRMACIÓN ======================== -->
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-card">
+      <h3>¿Finalizar examen?</h3>
+      <p id="confirmModalText">Tienes <strong></strong> preguntas sin responder. Una vez enviado no podrás modificar las respuestas.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="modalCancel">Cancelar</button>
+        <button type="button" class="btn-primary" id="modalConfirm">Sí, finalizar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== TOAST ======================== -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- ======================== SCRIPTS ======================== -->
+  <script src="js/questions.js" defer></script>
+  <script src="js/email-config.js" defer></script>
+  <script src="js/exam.js" defer></script>
+</body>
+</html>
