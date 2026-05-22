@@ -100,15 +100,10 @@
 
   /* ================ INICIALIZACIÓN ================ */
   function init() {
-    // Si ya se finalizó previamente este examen, bloquear (anti-reinicio)
+    // Limpiar estado previo para permitir nuevo intento siempre
     if (localStorage.getItem(FINISHED_KEY)) {
-      const ok = confirm('Ya finalizaste un examen en este navegador. ¿Deseas iniciar uno nuevo? (Se borrarán los registros locales del examen anterior).');
-      if (ok) {
-        localStorage.removeItem(FINISHED_KEY);
-        clearState();
-      } else {
-        return;
-      }
+      localStorage.removeItem(FINISHED_KEY);
+      clearState();
     }
 
     // Recuperar examen en progreso
